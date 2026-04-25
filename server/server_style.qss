@@ -1,0 +1,63 @@
+QMainWindow {
+    background-color: #1e1e2e;
+}
+
+QWidget {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 13px;
+}
+
+QPushButton {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #3a7bd5, stop:1 #2563ae
+    );
+    color: #ffffff;
+    border: 1px solid #1a4f8a;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    min-width: 100px;
+    min-height: 100px;
+}
+
+QPushButton:hover {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #4a8be5, stop:1 #3573be
+    );
+}
+
+QPushButton:pressed {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1a4f8a, stop:1 #2563ae
+    );
+    padding-top: 2px;
+}
+
+QPushButton[text="Stop"] {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #c0392b, stop:1 #96281b
+    );
+    border-color: #7b241c;
+}
+
+QPushButton[text="Stop"]:hover {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #d04040, stop:1 #a63020
+    );
+}
+
+QLabel {
+    background-color: #2a2a3e;
+    color: #a0c4ff;
+    border: 1px solid #3b3b5c;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-family: "Consolas", monospace;
+}
