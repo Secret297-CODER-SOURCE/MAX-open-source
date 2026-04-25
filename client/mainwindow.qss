@@ -1,0 +1,121 @@
+/* ═══════════════════════════════════════════════════════════
+   mainwindow.css  –  Dark "Log in" panel
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Global reset ────────────────────────────────────────── */
+* {
+    font-family: "Segoe UI", "SF Pro Display", "Helvetica Neue", sans-serif;
+    font-size: 15px;
+    color: #e0e0e0;
+    box-sizing: border-box;
+    outline: none;
+    border: none;
+}
+
+/* ── Window / root background ────────────────────────────── */
+QMainWindow,
+QWidget#centralWidget {
+    background-color: #1a1a1a;
+}
+
+/* ── Card panel ──────────────────────────────────────────── */
+QWidget#card {
+    background-color: #242424;
+    border-radius: 18px;
+}
+
+/* ── Title ───────────────────────────────────────────────── */
+QLabel#titleLabel {
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    color: #ececec;
+    padding-bottom: 4px;
+}
+
+/* ── Field labels ────────────────────────────────────────── */
+QLabel#fieldLabel {
+    font-size: 14px;
+    color: #c0c0c0;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    padding-left: 2px;
+}
+
+/* ── Text inputs ─────────────────────────────────────────── */
+QLineEdit#fieldEdit {
+    background-color: #111111;
+    border-radius: 14px;
+    padding: 0 16px;
+    font-size: 15px;
+    color: #e8e8e8;
+    selection-background-color: #444444;
+    /* subtle inner shadow via border trick */
+    border: 1px solid #1e1e1e;
+}
+
+QLineEdit#fieldEdit:focus {
+    border: 1px solid #3a3a3a;
+    background-color: #0e0e0e;
+}
+
+QLineEdit#fieldEdit:hover:!focus {
+    border: 1px solid #2a2a2a;
+}
+
+/* ── Connect button ──────────────────────────────────────── */
+QPushButton#connectButton {
+    background-color: #161616;
+    border-radius: 14px;
+    color: #e0e0e0;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.4px;
+    border: 1px solid #2a2a2a;
+}
+
+QPushButton#connectButton:hover {
+    background-color: #1f1f1f;
+    border: 1px solid #3a3a3a;
+    color: #ffffff;
+}
+
+QPushButton#connectButton:pressed {
+    background-color: #111111;
+    border: 1px solid #222222;
+    color: #bbbbbb;
+}
+
+/* ── Scrollbars (if ever needed) ─────────────────────────── */
+QScrollBar:vertical {
+    background: #1a1a1a;
+    width: 6px;
+    border-radius: 3px;
+}
+QScrollBar::handle:vertical {
+    background: #3a3a3a;
+    border-radius: 3px;
+    min-height: 24px;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+
+/* ── Message boxes ───────────────────────────────────────── */
+QMessageBox {
+    background-color: #242424;
+}
+QMessageBox QLabel {
+    color: #e0e0e0;
+}
+QPushButton {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333333;
+    padding: 6px 20px;
+    color: #e0e0e0;
+}
+QPushButton:hover {
+    background-color: #2a2a2a;
+}
