@@ -6,12 +6,16 @@ TARGET = untitled
 TEMPLATE = app
 
 SOURCES += \
+    chatwindow.cpp \
     clientsocket.cpp \
+    jsonclient.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    chatwindow.h \
     clientsocket.h \
+    jsonclient.h \
     mainwindow.h
 
 FORMS += \

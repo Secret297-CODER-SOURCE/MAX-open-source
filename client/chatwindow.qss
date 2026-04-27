@@ -1,0 +1,19 @@
+QMainWindow {
+    background-color: #1e1e2f;
+}
+
+QPushButton#disconnectBtn {
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+}
+
+QPushButton#disconnectBtn:hover {
+    background-color: #ff5c4d;
+}
+
+QPushButton#disconnectBtn:pressed {
+    background-color: #c0392b;
+}

@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     setWindowTitle("Log in");
     setMinimumSize(400, 520);
-    client = new clientSocket(this);
     // Center on screen
     if (auto *screen = QApplication::primaryScreen()) {
         const QRect sg = screen->availableGeometry();
@@ -108,26 +107,37 @@ void MainWindow::setupUi()
 
 void MainWindow::loadStyleSheet()
 {
-    QFile file(":/styles/mainwindow.qss");           // via Qt resource
-    if (!file.open(QIODevice::ReadOnly)) {
-        // Fallback: load from the working directory
-        file.setFileName("mainwindow.css");
-        if (!file.open(QIODevice::ReadOnly))
-            return;
-    }
-    qApp->setStyleSheet(QString::fromUtf8(file.readAll()));
-}
+    QFile file(":/styles/mainwindow.qss");
 
+    if (file.open(QFile::ReadOnly | QFile::Text)) {
+        this->setStyleSheet(file.readAll());
+    } else {
+        qDebug() << "Failed to load stylesheet";
+    }
+}
+void MainWindow::OnConnected()
+{
+
+    ChatWindow *chat = new ChatWindow(client);
+    connect(client, &clientSocket::disconnected, this, &MainWindow::show);
+
+    chat->show();
+    this->hide();
+}
 void MainWindow::onConnectClicked()
 {
     const QString name = m_nameEdit->text().trimmed();
     const QString ip   = m_ipEdit->text().trimmed();
     const QString port = m_portEdit->text().trimmed();
-
+    if (client) {
+        client->deleteLater();
+        client = nullptr;
+    }
     if (name.isEmpty() || ip.isEmpty() || port.isEmpty()) {
         QMessageBox::warning(this, "Missing fields", "Please fill in all fields before connecting.");
         return;
     }
-    quint16 port2 = static_cast<quint16>(port.toUInt());
+    client = new clientSocket(name, this);
+    connect(client, &clientSocket::connected, this, &MainWindow::OnConnected);
     client->ConnectClient(ip, port.toUInt());
 }

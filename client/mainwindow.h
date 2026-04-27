@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include "clientsocket.h"
+#include "chatwindow.h"
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -22,7 +23,9 @@ private slots:
 private:
     void setupUi();
     void loadStyleSheet();
-    clientSocket *client;
+    void OnConnected();
+    clientSocket *client = nullptr;
+    ChatWindow *chat;
     QWidget     *m_centralWidget;
     QWidget     *m_card;
     QVBoxLayout *m_cardLayout;
