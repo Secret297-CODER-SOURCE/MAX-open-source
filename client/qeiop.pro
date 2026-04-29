@@ -23,3 +23,6 @@ FORMS += \
 
 RESOURCES += \
     mainwindow.qrc
+
+DISTFILES += \
+    README.md
