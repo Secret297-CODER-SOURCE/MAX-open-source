@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     QWidget *central = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(central);
+    layout = new QVBoxLayout(central);
     central->setFixedSize(640, 480);
 
     QPushButton *button = new QPushButton("Start");
@@ -20,11 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(central);
 
-    char** ips = server.getIpAddressList();
-    for (int i = 0; i < 10; i++) {
-        if (ips[i] == nullptr) break;
-        layout->addWidget(new QLabel(ips[i]));
-    }
+    connect(&server, &ServerHost::clientListChanged, this, &MainWindow::LogConnectionBlock);
 
     connect(button, &QPushButton::clicked, [this, button]() {
         if (button->text() == "Start") {
@@ -33,8 +29,26 @@ MainWindow::MainWindow(QWidget *parent)
         } else {
             server.stop();
             button->setText("Start");
+            LogConnectionBlock();
         }
     });
+}
+
+void MainWindow::LogConnectionBlock() {
+    for (QLabel* label : iplabels) {
+        layout->removeWidget(label);
+        delete label;
+    }
+    iplabels.clear();
+
+    char** ips = server.getIpAddressList();
+    for (int i = 0; ips[i] != nullptr; i++) {
+        QLabel* label = new QLabel(ips[i]);
+        iplabels.append(label);
+        layout->addWidget(label);
+        delete[] ips[i];
+    }
+    delete[] ips;
 }
 
 MainWindow::~MainWindow()

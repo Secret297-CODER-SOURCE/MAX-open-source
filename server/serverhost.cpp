@@ -2,7 +2,6 @@
 #include <QAbstractSocket>
 #include <QString>
 ServerHost::ServerHost() {
-    server = new QTcpServer(this);
     clientCount = 0;
     capacity = 1;
     clientSocket = new QTcpSocket*[capacity];
@@ -13,14 +12,15 @@ ServerHost::ServerHost() {
 
 ServerHost::~ServerHost() {
     for (int i = 0; i < clientCount; i++) {
-        if (clientSocket[i])
-            delete clientSocket[i];
+        if (clientSocket[i]) {
+            clientSocket[i]->disconnectFromHost();
+        }
     }
     delete[] clientSocket;
 }
 
 char** ServerHost::getIpAddressList(){
-    char** listOfAddr = new char*[clientCount];
+    char** listOfAddr = new char*[clientCount + 1];
     QByteArray arr;
     for (int i = 0; i < clientCount; i++){
         arr = clientSocket[i]->peerAddress().toString().toUtf8();
@@ -32,8 +32,9 @@ char** ServerHost::getIpAddressList(){
 }
 
 void ServerHost::start(){
-    connect(server, &QTcpServer::newConnection, this, &ServerHost::newConnections);
-    server->listen(QHostAddress::Any, 8888);
+    disconnect(this, &QTcpServer::newConnection, this, &ServerHost::newConnections);
+    connect(this, &QTcpServer::newConnection, this, &ServerHost::newConnections);
+    this->listen(QHostAddress::Any, 8888);
 }
 
 void ServerHost::stop(){
@@ -43,7 +44,8 @@ void ServerHost::stop(){
             clientSocket[i] = nullptr;
         }
     }
-    server->close();
+    clientCount = 0;
+    this->close();
 }
 
 
@@ -71,17 +73,23 @@ int ServerHost::addClient(QTcpSocket* socket) {
 }
 
 void ServerHost::newConnections() {
-    while (server->hasPendingConnections()) {
-        QTcpSocket* socket = server->nextPendingConnection();
-        QThread* thread = new QThread;
+    while (this->hasPendingConnections()) {
+        QTcpSocket* socket = this->nextPendingConnection();
+        socket->setParent(nullptr);
 
+        addClient(socket);
+        emit clientListChanged();
+        qDebug() << "connect +1";
+
+        QThread* thread = new QThread;
         socket->moveToThread(thread);
-        qDebug()<<"connect +1";
 
         connect(socket, &QTcpSocket::readyRead, [socket]() {
             QByteArray data = socket->readAll();
             qDebug() << "Received" << data;
-            socket->write("Hello");
+            QMetaObject::invokeMethod(socket, [socket]() {
+                socket->write("Hello");
+            }, Qt::QueuedConnection);
         });
 
         connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);

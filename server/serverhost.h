@@ -8,10 +8,10 @@
 #include <QMap>
 
 class ServerHost : public QTcpServer {
+    Q_OBJECT
 public:
     ServerHost();
     ~ServerHost();
-    QTcpServer* server;
     QTcpSocket** clientSocket;
     int addClient(QTcpSocket* socket);
     int clientCount;
@@ -21,6 +21,9 @@ public:
     void stop();
     void newConnections();
     char** getIpAddressList();
+
+signals:
+    void clientListChanged();
 };
 
 #endif // SERVERHOST_H

@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QList>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,11 +22,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void StartServerButton();
-    void LogConnectionBlock();
 
 private:
+    void LogConnectionBlock();
     Ui::MainWindow *ui;
     ServerHost server;
+    QVBoxLayout *layout;
+    QList<QLabel*> iplabels;
 };
 #endif // MAINWINDOW_H
