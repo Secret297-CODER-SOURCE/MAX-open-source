@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -38,7 +41,7 @@ void MainWindow::LogConnectionBlock() {
     }
     iplabels.clear();
 
-    char** ips = server.getClientList();
+    char** ips = server.getIpAddressList();
     for (int i = 0; ips[i] != nullptr; i++) {
         QLabel* label = new QLabel(ips[i]);
         iplabels.append(label);

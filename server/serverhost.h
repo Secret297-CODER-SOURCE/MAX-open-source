@@ -6,36 +6,21 @@
 #include <QThread>
 #include <QDebug>
 #include <QMap>
-#include <QRandomGenerator>
-#include <cstring>
-#include <QJsonDocument>
-#include <QJsonObject>
-
-struct ClientInfo {
-    QTcpSocket* socket;
-    int id;
-    QString username;
-};
 
 class ServerHost : public QTcpServer {
     Q_OBJECT
 public:
     ServerHost();
     ~ServerHost();
-    void removeClient(QTcpSocket* socket);
-    char** getClientList();
-    int generateId();
+    QTcpSocket** clientSocket;
     int addClient(QTcpSocket* socket);
-    void MessageType(QByteArray data,QTcpSocket* socket);
+    int clientCount;
+    int capacity;
     void resizeArray();
     void start();
     void stop();
     void newConnections();
-    ClientInfo* findClientById(const int& id);
-
-    int clientCount;
-    int capacity;
-    ClientInfo* clients;
+    char** getIpAddressList();
 
 signals:
     void clientListChanged();
