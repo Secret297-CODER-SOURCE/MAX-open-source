@@ -2,5 +2,6 @@
     <qresource prefix="/styles">
         <file>mainwindow.qss</file>
         <file>chatwindow.qss</file>
+        <file>server_style.qss</file>
     </qresource>
 </RCC>

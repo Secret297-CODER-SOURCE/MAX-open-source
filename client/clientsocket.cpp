@@ -25,7 +25,9 @@ void clientSocket::onReadyRead(){
 }
 //---------------------------------
 
-
+QString clientSocket::GetName() const{
+    return username;
+}
 
 void clientSocket::DisconnectClient(){
     if (socket->state() == QAbstractSocket::ConnectedState) {

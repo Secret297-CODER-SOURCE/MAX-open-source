@@ -18,6 +18,7 @@ public:
     void ConnectClient(QString ip, quint16 id);
     void DisconnectClient();
     void SendRequest(const QByteArray &data);
+    QString GetName() const;
 signals:
     void connected();
     void disconnected();
