@@ -3,16 +3,22 @@
 #include <QMainWindow>
 #include <QWidget>
 #include "serverhost.h"
-#include <QFrame>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <QList>
+#include <QListWidget>
+#include <QTextEdit>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QFrame>
+#include <QGroupBox>
+#include <QScrollArea>
 
 QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
+namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -23,11 +29,21 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void refreshClientList();
+    void appendLog(const QString& msg);
+    void onToggleServer();
+
 private:
-    void LogConnectionBlock();
     Ui::MainWindow *ui;
     ServerHost server;
-    QVBoxLayout *layout;
-    QList<QLabel*> iplabels;
+    bool serverRunning = false;
+
+    // UI widgets
+    QPushButton *btnToggle;
+    QLabel      *lblStatus;
+    QLabel      *lblClientCount;
+    QListWidget *clientListWidget;
+    QTextEdit   *logView;
 };
 #endif // MAINWINDOW_H
