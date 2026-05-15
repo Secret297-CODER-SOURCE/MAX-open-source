@@ -36,7 +36,6 @@ public:
     ClientInfo* findClientById(const int& id);
     ClientInfo* findClientByUsername(const QString& username);
     void sendMessage(QTcpSocket* socket, const QJsonObject& obj);
-    void sendHistory(QTcpSocket* socket, int userId);
     database m_db;
     int clientCount;
     int capacity;

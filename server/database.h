@@ -29,8 +29,6 @@ public:
     bool isOpen() const;
 private:
     QSqlDatabase m_db;
-    QString      m_lastError;
-
     void createTables();
     QString connectionName() const { return "ServerDB"; }
 };

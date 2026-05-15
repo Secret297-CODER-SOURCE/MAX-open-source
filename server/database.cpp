@@ -105,13 +105,11 @@ QList<MessageRecord> database::getHistory(int userId1, int userId2)
         SELECT id, sender_id, receiver_id, content, timestamp
         FROM messages
         WHERE (sender_id = :u1 AND receiver_id = :u2)
-           OR (sender_id = :u2b AND receiver_id = :u1b)
+           OR (sender_id = :u2 AND receiver_id = :u1)
         ORDER BY id ASC
     )");
     q.bindValue(":u1",  userId1);
     q.bindValue(":u2",  userId2);
-    q.bindValue(":u1b", userId1);
-    q.bindValue(":u2b", userId2);
     q.exec();
 
     while (q.next()) {
