@@ -1,21 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
 #include <QMainWindow>
 #include <QWidget>
 #include "serverhost.h"
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QGridLayout>
 #include <QLabel>
-#include <QList>
 #include <QListWidget>
 #include <QTextEdit>
-#include <QLineEdit>
-#include <QSpinBox>
 #include <QFrame>
-#include <QGroupBox>
-#include <QScrollArea>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -39,11 +34,11 @@ private:
     ServerHost server;
     bool serverRunning = false;
 
-    // UI widgets
     QPushButton *btnToggle;
     QLabel      *lblStatus;
     QLabel      *lblClientCount;
     QListWidget *clientListWidget;
     QTextEdit   *logView;
 };
+
 #endif // MAINWINDOW_H

@@ -10,6 +10,8 @@
 #include <cstring>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
+#include "database.h"
 
 struct ClientInfo {
     QTcpSocket* socket;
@@ -32,7 +34,10 @@ public:
     void stop();
     void newConnections();
     ClientInfo* findClientById(const int& id);
-
+    ClientInfo* findClientByUsername(const QString& username);
+    void sendMessage(QTcpSocket* socket, const QJsonObject& obj);
+    void sendHistory(QTcpSocket* socket, int userId);
+    database m_db;
     int clientCount;
     int capacity;
     ClientInfo* clients;

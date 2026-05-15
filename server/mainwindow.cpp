@@ -27,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent)
     leftLayout->setContentsMargins(12, 12, 12, 12);
     leftLayout->setSpacing(10);
 
-    // Server title
     QLabel *titleLabel = new QLabel("SERVER HOST");
     titleLabel->setObjectName("titleLabel");
     titleLabel->setAlignment(Qt::AlignCenter);
@@ -36,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Status row
     QWidget *statusRow = new QWidget;
     QHBoxLayout *statusLayout = new QHBoxLayout(statusRow);
-    statusLayout->setContentsMargins(0,0,0,0);
+    statusLayout->setContentsMargins(0, 0, 0, 0);
     statusLayout->setSpacing(8);
     lblStatus = new QLabel("● OFFLINE");
     lblStatus->setObjectName("statusOffline");
@@ -59,12 +58,10 @@ MainWindow::MainWindow(QWidget *parent)
     sep->setObjectName("separator");
     leftLayout->addWidget(sep);
 
-    // Clients label
     QLabel *clientsHeader = new QLabel("CONNECTED CLIENTS");
     clientsHeader->setObjectName("sectionHeader");
     leftLayout->addWidget(clientsHeader);
 
-    // Client list
     clientListWidget = new QListWidget;
     clientListWidget->setObjectName("clientList");
     clientListWidget->setSelectionMode(QAbstractItemView::NoSelection);
@@ -76,12 +73,10 @@ MainWindow::MainWindow(QWidget *parent)
     rightLayout->setContentsMargins(0, 0, 0, 0);
     rightLayout->setSpacing(10);
 
-    // Activity log header
     QLabel *logHeader = new QLabel("ACTIVITY LOG");
     logHeader->setObjectName("sectionHeader");
     rightLayout->addWidget(logHeader);
 
-    // Log view
     logView = new QTextEdit;
     logView->setObjectName("logView");
     logView->setReadOnly(true);
@@ -93,14 +88,15 @@ MainWindow::MainWindow(QWidget *parent)
     rootLayout->addWidget(rightPanel, 1);
 
     // ── Connections ──────────────────────────────────────────────────
-    connect(btnToggle, &QPushButton::clicked, this, &MainWindow::onToggleServer);
+    connect(btnToggle, &QPushButton::clicked,        this, &MainWindow::onToggleServer);
     connect(&server, &ServerHost::clientListChanged, this, &MainWindow::refreshClientList);
-    connect(&server, &ServerHost::serverLogMessage, this, &MainWindow::appendLog);
+    connect(&server, &ServerHost::serverLogMessage,  this, &MainWindow::appendLog);
 
     appendLog("[SYSTEM] Server ready. Press START to begin listening on :8888");
 }
 
-void MainWindow::onToggleServer() {
+void MainWindow::onToggleServer()
+{
     if (!serverRunning) {
         server.start();
         serverRunning = true;
@@ -129,17 +125,19 @@ void MainWindow::onToggleServer() {
     }
 }
 
-void MainWindow::refreshClientList() {
+void MainWindow::refreshClientList()
+{
     clientListWidget->clear();
-    char** list = server.getClientList();
-    int count = 0;
+    char** list  = server.getClientList();
+    int    count = 0;
+
     for (int i = 0; list[i] != nullptr; i++) {
-        // Parse "id | username | ip" for nicer display
         QString raw = QString::fromUtf8(list[i]);
         QStringList parts = raw.split(" | ");
         QString display;
         if (parts.size() >= 3)
-            display = QString("ID:%1\n%2\n%3").arg(parts[0].trimmed(), parts[1].trimmed(), parts[2].trimmed());
+            display = QString("ID:%1\n%2\n%3")
+                          .arg(parts[0].trimmed(), parts[1].trimmed(), parts[2].trimmed());
         else
             display = raw;
 
@@ -154,11 +152,14 @@ void MainWindow::refreshClientList() {
     lblClientCount->setText(QString::number(count) + (count == 1 ? " client" : " clients"));
 }
 
-void MainWindow::appendLog(const QString& msg) {
+void MainWindow::appendLog(const QString& msg)
+{
     QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss");
-    logView->append(QString("<span style='color:#555e7a;'>[%1]</span> %2").arg(timestamp, msg));
+    logView->append(
+        QString("<span style='color:#555e7a;'>[%1]</span> %2").arg(timestamp, msg));
 }
 
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow()
+{
     delete ui;
 }
