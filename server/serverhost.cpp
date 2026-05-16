@@ -122,7 +122,7 @@ void ServerHost::MessageType(QByteArray data, QTcpSocket* socket){
                     break;
                 }
             }
-            socket->write(QJsonDocument(response).toJson(QJsonDocument::Compact));
+            socket->write(QJsonDocument(response).toJson(QJsonDocument::Compact) + "\n");
             emit clientListChanged();
         }
         else if (type == "EXIT") {
@@ -152,7 +152,7 @@ void ServerHost::newConnections() {
         emit serverLogMessage("[CONNECT] New client ID:" +QString::number(assignedId) +" from " +socket->peerAddress().toString());
         emit clientListChanged();
 
-        socket->write(("ID:" + QString::number(assignedId)).toUtf8());
+
 
         QThread* thread = new QThread;
         socket->moveToThread(thread);

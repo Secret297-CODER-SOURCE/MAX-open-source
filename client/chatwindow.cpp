@@ -9,20 +9,18 @@ ChatWindow::ChatWindow(clientSocket *client, QWidget *parent)
     setWindowTitle("Messenger");
     setFixedSize(WIN_W, WIN_H);
     m_myName = m_client->GetName();
-    m_myIp = printLocalIPAddresses();
     setupUi();
+    connect(m_client, &clientSocket::idReceived, this, [this](int realId) {
+        m_myId = QString::number(realId);
+        if (m_infoIp != nullptr) {
+            m_infoIp->setText("id:      " + m_myId);
+        }
+
+    });
     connect(m_client, &clientSocket::disconnected, this, &ChatWindow::close);
 
 }
-QString ChatWindow::printLocalIPAddresses() {
-    QList<QHostAddress> list = QNetworkInterface::allAddresses();
-    for (const QHostAddress &address : list) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)) {
-            return  address.toString();
-        }
-    }
-    return QString();
-}
+
 void ChatWindow::loadStyleSheet()
 {
     QFile file(":/styles/server_style.qss");
@@ -165,7 +163,7 @@ void ChatWindow::buildMenuPanel()
 
     m_infoName = new QLabel("name:  " + m_myName);
     m_infoName->setObjectName("infoLabel");
-    m_infoIp   = new QLabel("ip:      " + m_myIp);
+    m_infoIp   = new QLabel("id:      " + m_myId);
     m_infoIp->setObjectName("infoLabel");
 
     infoLayout->addWidget(infoBack);
@@ -338,7 +336,7 @@ void ChatWindow::hideMenu()
 void ChatWindow::showYourInfo()
 {
     m_infoName->setText("name:  " + m_myName);
-    m_infoIp->setText("ip:      " + m_myIp);
+    m_infoIp->setText("id:      " + m_myId);
     m_menuStack->setCurrentIndex(1);
 }
 

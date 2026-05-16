@@ -1,5 +1,4 @@
 #include "jsonclient.h"
-
 QByteArray JSONClient::PackLoginForm(const QString &name){
     QJsonObject obj;
     obj["type"] = "AUTH";
@@ -33,4 +32,26 @@ QByteArray JSONClient::PackChatCrtForm(const QString &chatname, const QList<int>
     }
     obj["ids"] = usersArray;
     return QJsonDocument(obj).toJson(QJsonDocument::Compact) + "\n";
+}
+
+QByteArray JSONClient::PackMessageGet(const int &roomId, const int &FromValue, const int &ToValue){
+    QJsonObject obj;
+    obj["type"] = "MGET";
+    obj["ID"] = roomId;
+    obj["From"] = FromValue;
+    obj["To"] = ToValue;
+    return QJsonDocument(obj).toJson(QJsonDocument::Compact) + "\n";
+}
+
+void JSONClient::OnGetInfo(const QJsonObject &obj, const QString &type){
+    if(type == "AUTH_OK"){
+        int id = obj["id"].toInt();
+        emit authOkReceived(id);
+
+    }
+    else{
+        qDebug() << "invalid request";
+    }
+//додати обробку AUTH_OK!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 }

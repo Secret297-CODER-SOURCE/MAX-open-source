@@ -4,6 +4,8 @@
 
 int main(int argc, char *argv[])
 {
+    qputenv("QT_ASSUME_STDERR_HAS_CONSOLE", "1");
+
     QApplication app(argc, argv);
     app.setApplicationName("Login");
     MainWindow window;
