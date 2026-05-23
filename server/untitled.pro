@@ -10,12 +10,14 @@ CONFIG += c++17
 
 SOURCES += \
     api.cpp \
+    client.cpp \
     main.cpp \
     mainwindow.cpp \
     serverhost.cpp
 
 HEADERS += \
     api.h \
+    client.h \
     mainwindow.h \
     serverhost.h
 

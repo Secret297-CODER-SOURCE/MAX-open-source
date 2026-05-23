@@ -68,7 +68,7 @@ void clientSocket::ConnectClient(QString ip, quint16 port){
     if (socket->state() == QAbstractSocket::UnconnectedState) {
         socket->connectToHost(ip, port);
         if (!socket->waitForConnected(5000)) {
-            throw std::runtime_error("Connection timed out or failed!");
+           qDebug() << "Socket isnt connected to anything.";
         }
     }
     else{

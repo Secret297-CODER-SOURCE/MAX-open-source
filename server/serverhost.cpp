@@ -45,6 +45,30 @@ ClientInfo* ServerHost::findClientById(const int& id) {
     }
     return nullptr;
 }
+void ServerHost::AuthClient(QJsonObject response,QTcpSocket* socket,QString username)
+{
+    for (int i = 0; i < clientCount; i++) {
+        if (clients[i].socket == socket) {
+            clients[i].username = username;
+            response["id"] = clients[i].id;
+            emit serverLogMessage(QString("[AUTH]") +QString::number(clients[i].id) + " authenticated as " + clients[i].username);
+            break;
+        }
+    }
+    socket->write(QJsonDocument(response).toJson(QJsonDocument::Compact) + "\n");
+    emit clientListChanged();
+}
+void ServerHost::ExitClient(QString username )
+{
+    for (int i = 0; i < clientCount; i++) {
+        if (clients[i].username == username) {
+            emit serverLogMessage(QString("[EXIT]" + clients[i].username + " disconnected"));
+            removeClient(clients[i].socket);
+            break;
+        }
+    }
+    emit clientListChanged();
+}
 
 void ServerHost::resizeArray() {
     int newCapacity = capacity * 2;
@@ -73,6 +97,8 @@ int ServerHost::addClient(QTcpSocket* socket) {
 
     return clientCount++;
 }
+
+
 
 void ServerHost::removeClient(QTcpSocket* socket) {
     for (int i = 0; i < clientCount; i++) {
@@ -103,44 +129,6 @@ char** ServerHost::getClientList(){
     return listOfAddr;
 }
 
-void ServerHost::MessageType(QByteArray data, QTcpSocket* socket){
-    QJsonDocument doc = QJsonDocument::fromJson(data);
-    if (!doc.isNull() && doc.isObject()) {
-        QJsonObject obj = doc.object();
-        QString type = obj["type"].toString();
-
-        if (type=="AUTH"){
-            QString username = obj["name"].toString();
-            QJsonObject response;
-            response["type"] = "AUTH_OK";
-            response["name"] = username;
-            for (int i = 0; i < clientCount; i++) {
-                if (clients[i].socket == socket) {
-                    clients[i].username = username;
-                    response["id"] = clients[i].id;
-                    emit serverLogMessage(QString("[AUTH]") +QString::number(clients[i].id) + " authenticated as " + clients[i].username);
-                    break;
-                }
-            }
-            socket->write(QJsonDocument(response).toJson(QJsonDocument::Compact) + "\n");
-            emit clientListChanged();
-        }
-        else if (type == "EXIT") {
-            QString username = obj["name"].toString();
-            for (int i = 0; i < clientCount; i++) {
-                if (clients[i].username == username) {
-                    emit serverLogMessage(QString("[EXIT]" + clients[i].username + " disconnected"));
-                    removeClient(clients[i].socket);
-                    break;
-                }
-            }
-            emit clientListChanged();
-        }
-        else{
-            socket->write("Hello");
-        }
-    }
-}
 void ServerHost::newConnections() {
     while (this->hasPendingConnections()) {
         QTcpSocket* socket = this->nextPendingConnection();
@@ -160,7 +148,11 @@ void ServerHost::newConnections() {
         connect(socket, &QTcpSocket::readyRead,[this, socket]() {
             QByteArray data = socket->readAll();
             qDebug() << "Received:" << QString::fromUtf8(data);
-            MessageType(data, socket);
+            if(EndPoint(data)=="AUTH"){
+                AuthClient(response,socket,username);
+            }else if(EndPoint(data)=="EXIT"){
+                ExitClient(username);
+            }
         });
 
         connect(socket, &QTcpSocket::disconnected, this, [this, socket]() {
