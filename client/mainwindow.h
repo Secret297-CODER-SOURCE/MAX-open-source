@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include "clientsocket.h"
 #include "chatwindow.h"
+#include "fsystem.h"
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -21,7 +22,9 @@ private slots:
     void onConnectClicked();
 
 private:
+    bool hasSavedAccount;
     void setupUi();
+    void refreshUI();
     void loadStyleSheet();
     void OnConnected();
     clientSocket *client = nullptr;
@@ -40,6 +43,6 @@ private:
 
     QLabel      *m_portLabel;
     QLineEdit   *m_portEdit;
-
+    QLabel *m_savedIdLabel;
     QPushButton *m_connectButton;
 };

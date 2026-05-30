@@ -71,7 +71,7 @@ private:
     QPushButton    *m_sendBtn;
 
     QString        m_myName;
-    QString        m_myIp;
+    QString        m_myId;
     QString        m_partnerName;
     QString        m_partnerIp;
 

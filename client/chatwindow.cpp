@@ -1,40 +1,48 @@
 #include "chatwindow.h"
-
+#include <QFile>
+#include <QDebug>
 
 ChatWindow::ChatWindow(clientSocket *client, QWidget *parent)
     : QMainWindow(parent)
 {
+    qDebug() << "Initializing ChatWindow instance...";
     setAttribute(Qt::WA_DeleteOnClose);
     m_client = client;
     setWindowTitle("Messenger");
     setFixedSize(WIN_W, WIN_H);
     m_myName = m_client->GetName();
-    m_myIp = printLocalIPAddresses();
-    setupUi();
-    connect(m_client, &clientSocket::disconnected, this, &ChatWindow::close);
 
-}
-QString ChatWindow::printLocalIPAddresses() {
-    QList<QHostAddress> list = QNetworkInterface::allAddresses();
-    for (const QHostAddress &address : list) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)) {
-            return  address.toString();
+    setupUi();
+
+    connect(m_client, &clientSocket::idReceived, this, [this](int realId) {
+        qDebug() << "ChatWindow received real ID via signal:" << realId;
+        m_myId = QString::number(realId);
+        if (m_infoIp != nullptr) {
+            m_infoIp->setText("id:      " + m_myId);
         }
-    }
-    return QString();
+    });
+
+    connect(m_client, &clientSocket::disconnected, this, [this]() {
+        qWarning() << "Client disconnected signal caught in ChatWindow. Closing window.";
+        this->close();
+    });
 }
+
 void ChatWindow::loadStyleSheet()
 {
     QFile file(":/styles/server_style.qss");
 
     if (file.open(QFile::ReadOnly | QFile::Text)) {
         this->setStyleSheet(file.readAll());
+        qDebug() << "ChatWindow stylesheet loaded successfully.";
     } else {
-        qDebug() << "Failed to load stylesheet";
+        qWarning() << "Failed to load ChatWindow stylesheet from path: :/styles/server_style.qss";
     }
 }
+
 void ChatWindow::setupUi()
 {
+    qDebug() << "Setting up ChatWindow UI components...";
     loadStyleSheet();
     QWidget *central = new QWidget(this);
     central->setObjectName("centralWidget");
@@ -49,13 +57,17 @@ void ChatWindow::setupUi()
 
     root->addWidget(m_leftPanel);
     root->addWidget(m_rightPanel, 1);
+    qDebug() << "ChatWindow UI layout assembly complete.";
 }
+
 void ChatWindow::onDisconnectClicked() {
+    qDebug() << "Disconnect clicked from menu button.";
     m_client->DisconnectClient();
-    qDebug() << "Disconnected.";
 }
+
 void ChatWindow::buildLeftPanel()
 {
+    qDebug() << "Building left control panel...";
     m_leftPanel = new QWidget();
     m_leftPanel->setObjectName("leftPanel");
     m_leftPanel->setFixedWidth(230);
@@ -113,6 +125,7 @@ void ChatWindow::buildLeftPanel()
 
 void ChatWindow::buildMenuPanel()
 {
+    qDebug() << "Building menu stacked widgets and panels...";
     m_menuFrame = new QFrame();
     m_menuFrame->setObjectName("menuFrame");
     m_menuFrame->setVisible(false);
@@ -165,7 +178,7 @@ void ChatWindow::buildMenuPanel()
 
     m_infoName = new QLabel("name:  " + m_myName);
     m_infoName->setObjectName("infoLabel");
-    m_infoIp   = new QLabel("ip:      " + m_myIp);
+    m_infoIp   = new QLabel("id:      " + m_myId);
     m_infoIp->setObjectName("infoLabel");
 
     infoLayout->addWidget(infoBack);
@@ -209,7 +222,6 @@ void ChatWindow::buildMenuPanel()
 
     m_menuStack->addWidget(findPage);
 
-
     //changetheme
     QWidget *themePage = new QWidget();
     QVBoxLayout *themeLayout = new QVBoxLayout(themePage);
@@ -243,8 +255,6 @@ void ChatWindow::buildMenuPanel()
 
     m_menuStack->addWidget(themePage);
 
-
-
     connect(yourInfoBtn,    &QPushButton::clicked, this, &ChatWindow::showYourInfo);
     connect(findPartnerBtn, &QPushButton::clicked, this, &ChatWindow::showFindPartner);
     connect(changeThemeBtn, &QPushButton::clicked, this, &ChatWindow::showChangeTheme);
@@ -257,9 +267,9 @@ void ChatWindow::buildMenuPanel()
     connect(connectBtn, &QPushButton::clicked, this, &ChatWindow::onConnectClicked);
 }
 
-//right
 void ChatWindow::buildRightPanel()
 {
+    qDebug() << "Building right chat display panel...";
     m_rightPanel = new QWidget();
     m_rightPanel->setObjectName("rightPanel");
 
@@ -295,7 +305,6 @@ void ChatWindow::buildRightPanel()
 
     m_messagesArea->setWidget(messagesContainer);
 
-
     //input
     QWidget *inputBar = new QWidget();
     inputBar->setObjectName("inputBar");
@@ -322,9 +331,11 @@ void ChatWindow::buildRightPanel()
     layout->addWidget(m_messagesArea, 1);
     layout->addWidget(inputBar);
 }
+
 void ChatWindow::toggleMenu()
 {
     bool visible = m_menuFrame->isVisible();
+    qDebug() << "Toggling menu panel visibility from" << visible << "to" << !visible;
     m_menuFrame->setVisible(!visible);
     if (!visible)
         m_menuStack->setCurrentIndex(0);
@@ -332,25 +343,30 @@ void ChatWindow::toggleMenu()
 
 void ChatWindow::hideMenu()
 {
+    qDebug() << "Hiding menu frame.";
     m_menuFrame->setVisible(false);
 }
 
 void ChatWindow::showYourInfo()
 {
+    qDebug() << "Navigating menu stack to 'Your Info' page.";
     m_infoName->setText("name:  " + m_myName);
-    m_infoIp->setText("ip:      " + m_myIp);
+    m_infoIp->setText("id:      " + m_myId);
     m_menuStack->setCurrentIndex(1);
 }
 
 void ChatWindow::showFindPartner()
 {
+    qDebug() << "Navigating menu stack to 'Find Partner' page.";
     m_menuStack->setCurrentIndex(2);
 }
 
 void ChatWindow::showChangeTheme()
 {
+    qDebug() << "Navigating menu stack to 'Change Theme' page.";
     m_menuStack->setCurrentIndex(3);
 }
+
 void ChatWindow::onConnectClicked(){
-    qDebug() << "OnConnectClicked works!";
+    qDebug() << "OnConnectClicked triggered inside menu page connection form.";
 }

@@ -5,11 +5,12 @@
 #include <QScreen>
 #include <QMessageBox>
 #include <QGraphicsDropShadowEffect>
-
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    qDebug() << "Initializing MainWindow...";
     setupUi();
     loadStyleSheet();
 
@@ -19,16 +20,45 @@ MainWindow::MainWindow(QWidget *parent)
     if (auto *screen = QApplication::primaryScreen()) {
         const QRect sg = screen->availableGeometry();
         move(sg.center() - rect().center());
+        qDebug() << "MainWindow centered on screen.";
     }
+}
+
+void MainWindow::refreshUI()
+{
+    hasSavedAccount = Fsystem::hasFile();
+    qDebug() << "Refreshing UI. Has saved account:" << hasSavedAccount;
+
+    if (hasSavedAccount) {
+        int savedId = Fsystem::loadSavedId();
+        m_titleLabel->setText("Log in");
+        m_nameLabel->setText("your id:");
+        m_nameEdit->setText(QString::number(savedId));
+        m_nameEdit->setDisabled(true);
+
+        m_connectButton->setText("Connect");
+        qDebug() << "UI configured for Login mode with ID:" << savedId;
+    } else {
+        m_titleLabel->setText("Register");
+        m_nameLabel->setText("name:");
+        m_nameEdit->setEnabled(true);
+        m_nameEdit->setPlaceholderText("Enter your nickname...");
+
+        m_connectButton->setText("Register & Connect");
+        qDebug() << "UI configured for Registration mode.";
+    }
+
+    m_ipEdit->clear();
+    m_portEdit->clear();
 }
 
 void MainWindow::setupUi()
 {
+    qDebug() << "Setting up UI elements...";
     // ── Root ──────────────────────────────────────────────────────────────
     m_centralWidget = new QWidget(this);
     m_centralWidget->setObjectName("centralWidget");
     setCentralWidget(m_centralWidget);
-
     auto *rootLayout = new QVBoxLayout(m_centralWidget);
     rootLayout->setContentsMargins(0, 0, 0, 0);
     rootLayout->setAlignment(Qt::AlignCenter);
@@ -50,11 +80,10 @@ void MainWindow::setupUi()
     m_cardLayout->setSpacing(0);
 
     // ── Title ─────────────────────────────────────────────────────────────
-    m_titleLabel = new QLabel("Log in", m_card);
+    m_titleLabel = new QLabel(m_card);
     m_titleLabel->setObjectName("titleLabel");
     m_titleLabel->setAlignment(Qt::AlignHCenter);
     m_cardLayout->addWidget(m_titleLabel);
-    m_cardLayout->addSpacing(32);
 
     // ── Name field ────────────────────────────────────────────────────────
     m_nameLabel = new QLabel("name:", m_card);
@@ -66,7 +95,6 @@ void MainWindow::setupUi()
     m_nameEdit->setObjectName("fieldEdit");
     m_nameEdit->setFixedHeight(52);
     m_cardLayout->addWidget(m_nameEdit);
-    m_cardLayout->addSpacing(18);
 
     // ── IP field ──────────────────────────────────────────────────────────
     m_ipLabel = new QLabel("ip:", m_card);
@@ -101,8 +129,10 @@ void MainWindow::setupUi()
 
     rootLayout->addWidget(m_card, 0, Qt::AlignCenter);
 
+    refreshUI();
     // ── Signals ───────────────────────────────────────────────────────────
     connect(m_connectButton, &QPushButton::clicked, this, &MainWindow::onConnectClicked);
+    qDebug() << "UI elements setup finished.";
 }
 
 void MainWindow::loadStyleSheet()
@@ -111,33 +141,69 @@ void MainWindow::loadStyleSheet()
 
     if (file.open(QFile::ReadOnly | QFile::Text)) {
         this->setStyleSheet(file.readAll());
+        qDebug() << "Stylesheet loaded successfully.";
     } else {
-        qDebug() << "Failed to load stylesheet";
+        qWarning() << "Failed to load stylesheet from path: :/styles/mainwindow.qss";
     }
 }
+
 void MainWindow::OnConnected()
 {
-
+    qDebug() << "OnConnected triggered. Initializing ChatWindow.";
     ChatWindow *chat = new ChatWindow(client);
-    connect(client, &clientSocket::disconnected, this, &MainWindow::show);
-
+    connect(client, &clientSocket::disconnected, this, [this]() {
+        qDebug() << "Client disconnected. Restoring MainWindow visibility.";
+        this->show();
+    });
+    connect(client, &clientSocket::disconnected, this, &MainWindow::refreshUI);
     chat->show();
     this->hide();
+    qDebug() << "ChatWindow shown, MainWindow hidden.";
 }
+
 void MainWindow::onConnectClicked()
 {
-    const QString name = m_nameEdit->text().trimmed();
     const QString ip   = m_ipEdit->text().trimmed();
     const QString port = m_portEdit->text().trimmed();
+
+    qDebug() << "Connect button clicked. IP entered:" << ip << "Port entered:" << port;
+
+    if (ip.isEmpty() || port.isEmpty())
+    {
+        qWarning() << "Connection aborted: IP or Port field is empty.";
+        QMessageBox::warning(this, "Missing fields", "Please fill in IP and Port fields.");
+        return;
+    }
+
+    const QString name = m_nameEdit->text().trimmed();
+    if (!hasSavedAccount && name.isEmpty())
+    {
+        qWarning() << "Connection aborted: Registration mode active, but name field is empty.";
+        QMessageBox::warning(this, "Missing fields", "Please enter your name to register.");
+        return;
+    }
+
     if (client) {
+        qDebug() << "Previous client socket instance exists. Releasing memory.";
         client->deleteLater();
         client = nullptr;
     }
-    if (name.isEmpty() || ip.isEmpty() || port.isEmpty()) {
-        QMessageBox::warning(this, "Missing fields", "Please fill in all fields before connecting.");
-        return;
+
+    if (hasSavedAccount) {
+        int savedId = Fsystem::loadSavedId();
+        qDebug() << "Creating client socket instance in Login mode with ID:" << savedId;
+        client = new clientSocket(savedId, this);
+    } else {
+        qDebug() << "Creating client socket instance in Registration mode with name:" << name;
+        client = new clientSocket(name, this);
     }
-    client = new clientSocket(name, this);
+
+    connect(client, &clientSocket::ConnectError, this, []() {
+        qCritical() << "Connection error signal received from client socket.";
+        QMessageBox::critical(nullptr, "Error!", "Server unavailable");
+    });
     connect(client, &clientSocket::connected, this, &MainWindow::OnConnected);
+
+    qDebug() << "Initiating connection request to" << ip << ":" << port;
     client->ConnectClient(ip, port.toUInt());
 }
