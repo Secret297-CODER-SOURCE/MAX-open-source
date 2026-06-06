@@ -31,4 +31,4 @@ private:
     api      m_api;
 };
 
-#endif // SERVERHOST_H
+#endif

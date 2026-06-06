@@ -35,4 +35,4 @@ private:
     int m_capacity;
 };
 
-#endif // CLIENTS_H
+#endif

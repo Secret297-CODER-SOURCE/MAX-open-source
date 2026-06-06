@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QTextEdit>
+#include <QStackedWidget>
 #include <QFrame>
 
 QT_BEGIN_NAMESPACE
@@ -28,6 +29,8 @@ private slots:
     void refreshClientList();
     void appendLog(const QString& msg);
     void onToggleServer();
+    void showLogsTab();
+    void showApiTab();
 
 private:
     Ui::MainWindow *ui;
@@ -39,6 +42,13 @@ private:
     QLabel      *lblClientCount;
     QListWidget *clientListWidget;
     QTextEdit   *logView;
+    QTextEdit   *apiView;
+
+    QPushButton    *tabLogsBtn;
+    QPushButton    *tabApiBtn;
+    QStackedWidget *rightStack;
+
+    void buildApiDoc();
 };
 
-#endif // MAINWINDOW_H
+#endif

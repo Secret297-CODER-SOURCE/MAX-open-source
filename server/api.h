@@ -34,4 +34,4 @@ private:
     database* m_db;
 };
 
-#endif // API_H
+#endif

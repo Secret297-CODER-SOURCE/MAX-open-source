@@ -42,4 +42,4 @@ private:
     QString connectionName() const { return "ServerDB"; }
 };
 
-#endif // DATABASE_H
+#endif

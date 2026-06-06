@@ -54,16 +54,6 @@ void database::createTables()
     )");
 }
 
-/*void database::registerUser(const QString& username, int customId)
-{
-    if (userExists(username)) return;
-    QSqlQuery q(m_db);
-    q.prepare("INSERT OR IGNORE INTO users (id, username) VALUES (:id, :u)");
-    q.bindValue(":id", customId);
-    q.bindValue(":u",  username);
-    q.exec();
-}*/
-
 bool database::userExists(const QString& username)
 {
     QSqlQuery q(m_db);
