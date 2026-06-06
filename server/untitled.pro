@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     api.cpp \
+    clients.cpp \
     database.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -17,6 +18,7 @@ SOURCES += \
 
 HEADERS += \
     api.h \
+    clients.h \
     database.h \
     mainwindow.h \
     serverhost.h

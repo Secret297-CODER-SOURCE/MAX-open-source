@@ -1,49 +1,34 @@
 #ifndef SERVERHOST_H
 #define SERVERHOST_H
-#include <QCoreApplication>
+
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QThread>
-#include <QDebug>
-#include <QMap>
-#include <QRandomGenerator>
-#include <cstring>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
+#include "clients.h"
 #include "database.h"
-
-struct ClientInfo {
-    QTcpSocket* socket;
-    int id;
-    QString username;
-};
+#include "api.h"
 
 class ServerHost : public QTcpServer {
     Q_OBJECT
 public:
     ServerHost();
     ~ServerHost();
-    void removeClient(QTcpSocket* socket);
-    char** getClientList();
-    int generateId();
-    int addClient(QTcpSocket* socket);
-    void MessageType(QByteArray data,QTcpSocket* socket);
-    void resizeArray();
+
     void start();
     void stop();
-    void newConnections();
-    ClientInfo* findClientById(const int& id);
-    ClientInfo* findClientByUsername(const QString& username);
-    void sendMessage(QTcpSocket* socket, const QJsonObject& obj);
-    database m_db;
-    int clientCount;
-    int capacity;
-    ClientInfo* clients;
+
+    char** getClientList() const { return m_clients.getClientList(); }
 
 signals:
     void clientListChanged();
     void serverLogMessage(const QString& msg);
+
+private slots:
+    void newConnections();
+
+private:
+    database m_db;
+    Clients  m_clients;
+    api      m_api;
 };
 
 #endif // SERVERHOST_H
