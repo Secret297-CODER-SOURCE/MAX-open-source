@@ -1,5 +1,6 @@
 #include "clients.h"
 #include <QRandomGenerator>
+#include <QHostAddress>
 #include <cstring>
 
 Clients::Clients()
