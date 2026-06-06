@@ -114,71 +114,85 @@ char** ServerHost::getClientList() {
 
 void ServerHost::MessageType(QByteArray data, QTcpSocket* socket) {
     QJsonDocument doc = QJsonDocument::fromJson(data);
-    if (!doc.isNull() && doc.isObject()) {
-        QJsonObject obj = doc.object();
-        QString type = obj["type"].toString();
+    if (!doc.isObject()) return;
+    QJsonObject obj = doc.object();
+    QString type = obj["type"].toString();
 
-        if (type == "AUTH") {
-            QString username = obj["name"].toString();
-
+    if (type == "REG") {
+        QString name = obj["name"].toString();
+        if (name.isEmpty()) return;
+        int customId = -1;
+        for (int i = 0; i < clientCount; i++) {
+            if (clients[i].socket == socket) {
+                clients[i].username = name;
+                customId = clients[i].id;
+                break;
+            }
+        }
+        if (customId == -1) return;
+        m_db.registerUser(name, customId);
+        int dbId = customId;
+        for (int i = 0; i < clientCount; i++) {
+            if (clients[i].socket == socket) {
+                clients[i].username = name;
+                break;
+            }
+        }
+        QJsonObject resp;
+        resp["type"] = "AUTH_OK";
+        resp["id"]   = dbId;
+        socket->write(QJsonDocument(resp).toJson(QJsonDocument::Compact) + "\n");
+        emit serverLogMessage("[REG] " + name + " id=" + QString::number(dbId));
+        emit clientListChanged();
+    }
+    else if (type == "AUTH") {
+        int userid = obj["userid"].toInt();
+        QString name = m_db.getUsernameById(userid);
+        QJsonObject resp;
+        if (name.isEmpty()) {
+            resp["type"] = "AUTH_FAIL";
+        } else {
             for (int i = 0; i < clientCount; i++) {
                 if (clients[i].socket == socket) {
-                    clients[i].username = username;
-                    int dbUserId = -1;
-                    if (m_db.isOpen()) {
-                        m_db.registerUser(username);
-                        dbUserId = m_db.getUserId(username);
-                        qDebug() << QString::number(dbUserId);
-                    }
-                    QJsonObject response;
-                    response["type"] = "AUTH_OK";
-                    response["name"] = username;
-                    response["id"]= clients[i].id;
+                    clients[i].username = name;
                     break;
                 }
             }
+            resp["type"] = "AUTH_OK";
+            resp["id"]   = userid;
         }
-        else if (type =="MESSAGE") {
-            QString senderName= obj["senderName"].toString();
-            QString receiverName =obj["receiverName"].toString();
-            QString content =obj["content"].toString();
+        socket->write(QJsonDocument(resp).toJson(QJsonDocument::Compact) + "\n");
+        emit serverLogMessage("[AUTH] id=" + QString::number(userid) + " -> " + (name.isEmpty() ? "FAIL" : name));
+        emit clientListChanged();
+    }
+    else if (type == "MSG") {
+        QString senderName = obj["senderName"].toString();
+        int     receiverId = obj["receiverId"].toInt();  // по ID!
+        QString content    = obj["content"].toString();
+        if (senderName.isEmpty() || content.isEmpty()) return;
 
-            if (senderName.isEmpty() || receiverName.isEmpty() || content.isEmpty())
-                return;
+        int sId = m_db.getUserId(senderName);
+        if (sId != -1 && receiverId != -1)
+            m_db.saveMessage(sId, receiverId, content);
 
-            ClientInfo* sender =findClientByUsername(senderName);
-            if (!sender)
-                return;
-
-            int senderId = sender->id;
-            int senderDbId = m_db.getUserId(senderName);
-            int receiverDbId = m_db.getUserId(receiverName);
-
-            m_db.saveMessage(senderDbId, receiverDbId, content);
+        // шукаємо отримувача по ID
+        ClientInfo* receiver = findClientById(receiverId);
+        if (receiver && receiver->socket->state() == QAbstractSocket::ConnectedState) {
             QJsonObject delivery;
-            delivery["type"]= "MESSAGE";
-            delivery["senderId"] =senderId;
-            delivery["content"] = content;
-
-            ClientInfo* receiver = findClientByUsername(receiverName);
-            if (receiver->socket->state() == QAbstractSocket::ConnectedState)
-                receiver->socket->write(QJsonDocument(delivery).toJson(QJsonDocument::Compact));
-            emit serverLogMessage(QString("[MSG] ") + senderName + " to " + receiverName + ": " + content);
+            delivery["type"]       = "MSG";
+            delivery["senderName"] = senderName;
+            delivery["content"]    = content;
+            receiver->socket->write(QJsonDocument(delivery).toJson(QJsonDocument::Compact) + "\n");
         }
-
-        else if (type == "EXIT") {
-            QString username = obj["name"].toString();
-            for (int i = 0; i < clientCount; i++) {
-                if (clients[i].username == username) {
-                    emit serverLogMessage(QString("[EXIT]" + clients[i].username + " disconnected"));
-                    removeClient(clients[i].socket);
-                    break;
-                }
-            }
+        emit serverLogMessage("[MSG] " + senderName + " -> id:" + QString::number(receiverId) + ": " + content);
+    }
+    else if (type == "EXIT") {
+        QString name = obj["name"].toString();
+        ClientInfo* c = findClientByUsername(name);
+        if (c) {
+            emit serverLogMessage("[EXIT] " + name);
+            removeClient(c->socket);
             emit clientListChanged();
-        }
-        else {
-            socket->write("Hello");
         }
     }
 }
@@ -193,7 +207,11 @@ void ServerHost::newConnections() {
         emit serverLogMessage("[CONNECT] New client ID:" + QString::number(assignedId) + " from " + socket->peerAddress().toString());
         emit clientListChanged();
 
-        socket->write((("{ID:" + QString::number(assignedId)) + "}").toUtf8());
+        //socket->write((("{ID:" + QString::number(assignedId)) + "}").toUtf8());
+        QJsonObject welcome;
+        welcome["type"] = "WELCOME";
+        welcome["tempid"] = assignedId;
+        socket->write(QJsonDocument(welcome).toJson(QJsonDocument::Compact) + "\n");
 
         connect(socket, &QTcpSocket::readyRead, this, [this, socket]() {
             QByteArray data = socket->readAll();

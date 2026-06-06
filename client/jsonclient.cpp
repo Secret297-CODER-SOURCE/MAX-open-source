@@ -52,26 +52,32 @@ QByteArray JSONClient::PackChatCrtForm(const QString &chatname, const QList<int>
 QByteArray JSONClient::PackMessageGet(const int &roomId, const int &FromValue, const int &ToValue){
     qDebug() << "Packing MGET form. Room:" << roomId << "From:" << FromValue << "To:" << ToValue;
     QJsonObject obj;
-    obj["type"] = "MGET";
+        obj["type"] = "MGET";
     obj["id"] = roomId;
     obj["from"] = FromValue;
     obj["to"] = ToValue;
     return QJsonDocument(obj).toJson(QJsonDocument::Compact) + "\n";
 }
 
-void JSONClient::OnGetInfo(const QJsonObject &obj, const QString &type){
-    qDebug() << "Processing incoming JSON packet info. Type:" << type;
-
-    if(type == "AUTH_OK"){
-        int id = obj["id"].toInt();
-        qDebug() << "Received AUTH_OK. Parsing ID:" << id;
-        emit authOkReceived(id);
+void JSONClient::OnGetInfo(const QJsonObject &obj, const QString &type) {
+    if (type == "AUTH_OK") {
+        emit authOkReceived(obj["id"].toInt());
     }
-    else if(type == "AUTH_FAIL"){
-        qWarning() << "Received AUTH_FAIL from server.";
+    else if (type == "AUTH_FAIL") {
         emit AuthFailed();
     }
-    else{
-        qWarning() << "Received unknown or invalid request type:" << type;
+    else if (type == "MSG") {
+        emit messageReceived(obj["senderName"].toString(),
+                             obj["content"].toString());
     }
+}
+QByteArray JSONClient::PackDirectMessage(const QString &senderName,
+                                         int receiverId,
+                                         const QString &content) {
+    QJsonObject obj;
+    obj["type"]= "MSG";
+    obj["senderName"] = senderName;
+    obj["receiverId"]= receiverId;
+    obj["content"]= content;
+    return QJsonDocument(obj).toJson(QJsonDocument::Compact) + "\n";
 }

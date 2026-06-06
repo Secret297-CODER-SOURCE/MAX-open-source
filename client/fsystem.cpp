@@ -48,3 +48,19 @@ bool Fsystem::hasFile()
     qDebug() << "Checking if 'id.txt' exists:" << exists;
     return exists;
 }
+void Fsystem::saveName(const QString &name)
+{
+    QFile f("name.txt");
+    if (f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&f);
+        out << name;
+    }
+}
+
+QString Fsystem::loadSavedName()
+{
+    QFile f("name.txt");
+    if (f.open(QIODevice::ReadOnly | QIODevice::Text))
+        return QTextStream(&f).readAll().trimmed();
+    return "";
+}

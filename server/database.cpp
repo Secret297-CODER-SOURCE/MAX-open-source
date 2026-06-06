@@ -40,7 +40,7 @@ void database::createTables()
     q.exec(R"(
         CREATE TABLE IF NOT EXISTS users (
             id       INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
+            username TEXT UNIQUE NOT NULL
         )
     )");
     q.exec(R"(
@@ -54,15 +54,15 @@ void database::createTables()
     )");
 }
 
-void database::registerUser(const QString& username)
+/*void database::registerUser(const QString& username, int customId)
 {
-    if (userExists(username))
-        return;
+    if (userExists(username)) return;
     QSqlQuery q(m_db);
-    q.prepare("INSERT OR IGNORE INTO users (username) VALUES (:u)");
-    q.bindValue(":u", username);
+    q.prepare("INSERT OR IGNORE INTO users (id, username) VALUES (:id, :u)");
+    q.bindValue(":id", customId);
+    q.bindValue(":u",  username);
     q.exec();
-}
+}*/
 
 bool database::userExists(const QString& username)
 {
@@ -148,4 +148,13 @@ QList<MessageRecord> database::getAllMessages(int userId)
         result.append(r);
     }
     return result;
+}
+QString database::getUsernameById(int userId)
+{
+    QSqlQuery q(m_db);
+    q.prepare("SELECT username FROM users WHERE id = :id");
+    q.bindValue(":id", userId);
+    q.exec();
+    if (q.next()) return q.value(0).toString();
+    return "";
 }

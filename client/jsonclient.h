@@ -16,6 +16,7 @@ public:
     QByteArray PackRegisterForm(const QString &name);
     QByteArray PackMessageForm(const QString &name,const QString &message, const int &roomId, const QDateTime &currentTime );
     QByteArray PackExitForm(const QString &name);
+    QByteArray PackDirectMessage(const QString &senderName, int receiverId, const QString &content);
     QByteArray PackChatCrtForm(const QString &chatname, const QList<int> &ids);
     QByteArray PackMessageGet(const int &roomId, const int &FromValue, const int &ToValue);
 
@@ -23,6 +24,7 @@ public:
 signals:
     void authOkReceived(int id);
     void AuthFailed();
+    void messageReceived(const QString &senderName, const QString &content);
 };
 
 #endif // JSONCLIENT_H

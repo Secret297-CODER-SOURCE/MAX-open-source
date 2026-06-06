@@ -22,6 +22,10 @@ private slots:
     void onConnectClicked();
 
 private:
+    bool m_isLoginMode = true;
+
+    QPushButton *m_loginModeButton;
+    QPushButton *m_registerModeButton;
     bool hasSavedAccount;
     void setupUi();
     void refreshUI();

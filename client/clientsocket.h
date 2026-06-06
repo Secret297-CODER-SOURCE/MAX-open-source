@@ -1,44 +1,50 @@
-#ifndef CLIENTSOCKET_H
-#define CLIENTSOCKET_H
+#pragma once
 
+#include <QObject>
 #include <QTcpSocket>
 #include <QByteArray>
-#include <jsonclient.h>
-#include <fsystem.h>
+#include <QJsonDocument>
+#include <QJsonObject>
 
-class clientSocket: public QObject
+#include "jsonclient.h"
+#include "fsystem.h"
+
+class clientSocket : public QObject
 {
     Q_OBJECT
-private:
-    QTcpSocket *socket;
-    QString username;
-    int id;
-    QByteArray buffer;
-    JSONClient* parser;
-
-private slots:
-    void onReadyRead();
-    void onSocketConnected();
 
 public:
-
     explicit clientSocket(QString username, QObject *parent = nullptr);
     explicit clientSocket(int clientId, QObject *parent = nullptr);
 
+    QString GetName() const;
+    int     GetId()   const;
+
     void ConnectClient(QString ip, quint16 port);
     void DisconnectClient();
-    void SendRequest(const QByteArray &data);
-    QString GetName() const;
-    int GetId() const;
-    void setClientId(int newId);
-    void SendRegistrationRequest();
-    void SendAuthenticationRequest();
-    void initSocketAndParser();
+    void SendDirectMessage(int receiverId, const QString &content);
+
 signals:
     void connected();
     void disconnected();
-    void idReceived(int userId);
     void ConnectError();
-};
+    void idReceived(int userId);
+    void messageReceived(const QString &from, const QString &content);
 
-#endif // CLIENTSOCKET_H
+private slots:
+    void onSocketConnected();
+    void onReadyRead();
+
+private:
+    void initSocketAndParser();
+    void SendRequest(const QByteArray &data);
+    void SendRegistrationRequest();
+    void SendAuthenticationRequest();
+
+    QTcpSocket  *socket  = nullptr;
+    JSONClient  *parser  = nullptr;
+
+    QString      username;
+    int          id;
+    QByteArray   buffer;
+};

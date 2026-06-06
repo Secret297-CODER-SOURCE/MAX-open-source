@@ -1,11 +1,15 @@
 #include "logger.h"
 #include <iostream>
+#include <QCoreApplication>
 QFile logger::logFile;
+QMutex logger::mutex;
 bool logger::init(){
-    logFile.setFileName("logger.txt");
+    QString logPath = QCoreApplication::applicationDirPath() + "/logger.txt";
+    logFile.setFileName(logPath);
     return logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 }
 void logger::messageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg){
+    QMutexLocker locker(&mutex);
     LogMessage log;
     log.msg = msg;
     log.timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz");
@@ -22,7 +26,8 @@ void logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
         out << QString("[%1] [%2] (%3) -> %4\n")
                     .arg(log.timestamp, log.type, QString::number(log.line), log.msg);
         out.flush();
+        logFile.flush();
     }
-    std::cout << QString("[%1] [%2] %3\n").arg(log.timestamp, log.type, log.msg).toStdString();
+    std::cout << QString("[%1] [%2] %3").arg(log.timestamp, log.type, log.msg).toStdString() << std::endl;
 
 }

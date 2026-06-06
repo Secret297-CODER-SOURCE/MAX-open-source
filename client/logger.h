@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QDateTime>
 #include <QTextStream>
+#include <QMutex>
 struct LogMessage {
     QString msg;
     QString type;
@@ -18,5 +19,6 @@ public:
 
 private:
     static QFile logFile;
+    static QMutex mutex;
 
 };

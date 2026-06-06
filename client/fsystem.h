@@ -10,6 +10,7 @@ public:
     static void saveId(int userId);
     static int loadSavedId();
     static bool hasFile();
+    static void saveName(const QString &name);
+    static QString loadSavedName();
 };
-
 #endif // FSYSTEM_H

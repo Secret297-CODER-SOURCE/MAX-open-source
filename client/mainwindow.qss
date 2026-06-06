@@ -1,14 +1,8 @@
-/* ═══════════════════════════════════════════════════════════
-   mainwindow.css  –  Dark "Log in" panel
-   ═══════════════════════════════════════════════════════════ */
-
 /* ── Global reset ────────────────────────────────────────── */
-* {
+QWidget {
     font-family: "Segoe UI", "SF Pro Display", "Helvetica Neue", sans-serif;
     font-size: 15px;
     color: #e0e0e0;
-    outline: none;
-    border: none;
 }
 
 /* ── Window / root background ────────────────────────────── */
@@ -27,7 +21,6 @@ QWidget#card {
 QLabel#titleLabel {
     font-size: 32px;
     font-weight: 300;
-    letter-spacing: 0.5px;
     color: #ececec;
     padding-bottom: 4px;
 }
@@ -45,7 +38,6 @@ QLabel#fieldLabel {
     font-size: 14px;
     color: #c0c0c0;
     font-weight: 400;
-    letter-spacing: 0.2px;
     padding-left: 2px;
 }
 
@@ -76,7 +68,6 @@ QPushButton#connectButton {
     color: #e0e0e0;
     font-size: 16px;
     font-weight: 400;
-    letter-spacing: 0.4px;
     border: 1px solid #2a2a2a;
 }
 
@@ -107,7 +98,7 @@ QScrollBar::handle:vertical {
 
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
-    height: 0;
+    height: 0px;
 }
 
 /* ── Message boxes ───────────────────────────────────────── */
@@ -129,4 +120,26 @@ QMessageBox QPushButton {
 
 QMessageBox QPushButton:hover {
     background-color: #2a2a2a;
+}
+
+/* ── Mode switch buttons (Login / Register) ─────────────── */
+QPushButton#modeButton {
+    background-color: transparent;
+    border: 1px solid #2a2a2a;
+    padding: 8px 18px;
+    border-radius: 12px;
+    color: #aaaaaa;
+    font-size: 14px;
+}
+
+QPushButton#modeButton:hover {
+    background-color: #1f1f1f;
+    color: #ffffff;
+    border: 1px solid #3a3a3a;
+}
+
+QPushButton#modeButton:disabled {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #4a4a4a;
 }

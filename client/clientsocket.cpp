@@ -41,10 +41,12 @@ void clientSocket::initSocketAndParser()
     });
     connect(parser, &JSONClient::authOkReceived, this, [this](int userId) {
         this->id = userId;
-        qDebug() << "Successfully authorized/registered with id: " << this->id;
         Fsystem::saveId(userId);
+        if (!this->username.isEmpty())
+            Fsystem::saveName(this->username);
         emit idReceived(userId);
     });
+    connect(parser, &JSONClient::messageReceived, this, &clientSocket::messageReceived);
 }
 
 void clientSocket::onSocketConnected(){
@@ -140,4 +142,8 @@ void clientSocket::SendAuthenticationRequest(){
     qDebug() << "Sending authentication request for id:" << this->id;
     QByteArray authData = parser->PackLoginForm(this->id);
     socket->write(authData);
+}
+void clientSocket::SendDirectMessage(int receiverId, const QString &content) {
+    QByteArray data = parser->PackDirectMessage(this->username, receiverId, content);
+    SendRequest(data);
 }

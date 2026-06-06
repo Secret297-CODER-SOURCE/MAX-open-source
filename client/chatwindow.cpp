@@ -26,6 +26,10 @@ ChatWindow::ChatWindow(clientSocket *client, QWidget *parent)
         qWarning() << "Client disconnected signal caught in ChatWindow. Closing window.";
         this->close();
     });
+    connect(m_client, &clientSocket::messageReceived,
+            this, [this](const QString &from, const QString &content) {
+                appendMessage(from, content, false);
+            });
 }
 
 void ChatWindow::loadStyleSheet()
@@ -323,6 +327,15 @@ void ChatWindow::buildRightPanel()
     m_sendBtn->setObjectName("sendBtn");
     m_sendBtn->setFixedSize(38, 38);
     m_sendBtn->setCursor(Qt::PointingHandCursor);
+    auto doSend = [this]() {
+        QString text = m_messageInput->text().trimmed();
+        if (text.isEmpty() || m_partnerId == -1) return;
+        appendMessage(m_myName, text, true);
+        m_client->SendDirectMessage(m_partnerId, text);
+        m_messageInput->clear();
+    };
+    connect(m_sendBtn,       &QPushButton::clicked,    this, doSend);
+    connect(m_messageInput,  &QLineEdit::returnPressed, this, doSend);
 
     inputLayout->addWidget(m_messageInput, 1);
     inputLayout->addWidget(m_sendBtn);
@@ -367,6 +380,51 @@ void ChatWindow::showChangeTheme()
     m_menuStack->setCurrentIndex(3);
 }
 
-void ChatWindow::onConnectClicked(){
-    qDebug() << "OnConnectClicked triggered inside menu page connection form.";
+void ChatWindow::onConnectClicked() {
+    bool ok;
+    int id = m_partnerIpEdit->text().trimmed().toInt(&ok);
+    if (!ok || id <= 0) return;
+    m_partnerId   = id;
+    m_partnerName = m_partnerNameEdit->text().trimmed();
+    m_chatHeader->setText(m_partnerName.isEmpty()
+                              ? "ID: " + QString::number(id)
+                              : m_partnerName);
+    hideMenu();
+}
+void ChatWindow::appendMessage(const QString &from,const QString &text,bool isMine)
+{
+    QWidget *row = new QWidget();
+    QHBoxLayout *rowLayout = new QHBoxLayout(row);
+    rowLayout->setContentsMargins(0, 2, 0, 2);
+
+    QWidget *bubble = new QWidget();
+    bubble->setObjectName(isMine ? "bubbleMine" : "bubbleTheirs");
+    bubble->setMaximumWidth(500);
+
+    QVBoxLayout *bl = new QVBoxLayout(bubble);
+    bl->setContentsMargins(12, 8, 12, 6);
+    bl->setSpacing(2);
+
+    if (!isMine) {
+        QLabel *nameLabel = new QLabel(from);
+        nameLabel->setObjectName("bubbleSender");
+        bl->addWidget(nameLabel);
+    }
+    QLabel *textLabel = new QLabel(text);
+    textLabel->setObjectName("bubbleText");
+    textLabel->setWordWrap(true);
+    bl->addWidget(textLabel);
+
+    QLabel *timeLabel = new QLabel(QTime::currentTime().toString("hh:mm"));
+    timeLabel->setObjectName("bubbleTime");
+    timeLabel->setAlignment(Qt::AlignRight);
+    bl->addWidget(timeLabel);
+
+    if (isMine) { rowLayout->addStretch(); rowLayout->addWidget(bubble); }
+    else        { rowLayout->addWidget(bubble); rowLayout->addStretch(); }
+
+    m_messagesLayout->insertWidget(m_messagesLayout->count() - 1, row);
+    QApplication::processEvents();
+    m_messagesArea->verticalScrollBar()->setValue(
+        m_messagesArea->verticalScrollBar()->maximum());
 }

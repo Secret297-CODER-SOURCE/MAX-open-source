@@ -1,0 +1,12 @@
+release/chatwindow.o
+release/clientsocket.o
+release/fsystem.o
+release/jsonclient.o
+release/logger.o
+release/main.o
+release/mainwindow.o
+release/qrc_mainwindow.o
+release/moc_chatwindow.o
+release/moc_clientsocket.o
+release/moc_jsonclient.o
+release/moc_mainwindow.o
