@@ -1,6 +1,8 @@
 #include "chatwindow.h"
+#include "aidialog.h"
 #include <QFile>
 #include <QDebug>
+#include <QResizeEvent>
 
 ChatWindow::ChatWindow(clientSocket *client, QWidget *parent)
     : QMainWindow(parent)
@@ -61,7 +63,45 @@ void ChatWindow::setupUi()
 
     root->addWidget(m_leftPanel);
     root->addWidget(m_rightPanel, 1);
+
+    m_aiBtn = new QPushButton("AI", central);
+    m_aiBtn->setFixedSize(48, 48);
+    m_aiBtn->setCursor(Qt::PointingHandCursor);
+    m_aiBtn->setToolTip("AI Assistant");
+    m_aiBtn->setStyleSheet(
+        "QPushButton { background:#242424; color:#e0e0e0; border:1px solid #2a2a2a;"
+        "              border-radius:24px; font-size:14px; font-weight:600;"
+        "              font-family:'Segoe UI','SF Pro Display',sans-serif;"
+        "              letter-spacing:0.5px; }"
+        "QPushButton:hover  { background:#2e2e2e; border:1px solid #3a3a3a; color:#fff; }"
+        "QPushButton:pressed{ background:#1a1a1a; border:1px solid #2a2a2a; }"
+    );
+    m_aiBtn->raise();
+    connect(m_aiBtn, &QPushButton::clicked, this, &ChatWindow::openAiDialog);
+
     qDebug() << "ChatWindow UI layout assembly complete.";
+}
+
+void ChatWindow::resizeEvent(QResizeEvent *e)
+{
+    QMainWindow::resizeEvent(e);
+    if (m_aiBtn) {
+        const int margin = 22;
+        const int inputBarHeight = 56;
+        m_aiBtn->move(width()  - m_aiBtn->width()  - margin,
+                      height() - m_aiBtn->height() - inputBarHeight - margin);
+        m_aiBtn->raise();
+    }
+}
+
+void ChatWindow::openAiDialog()
+{
+    AiDialog *dlg = new AiDialog(this);
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    QPoint anchor = m_aiBtn->mapToGlobal(QPoint(m_aiBtn->width(), 0));
+    dlg->move(anchor.x() - dlg->width(),
+              anchor.y() - dlg->height() - 10);
+    dlg->show();
 }
 
 void ChatWindow::onDisconnectClicked() {

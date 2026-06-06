@@ -6,6 +6,7 @@ TARGET = untitled
 TEMPLATE = app
 
 SOURCES += \
+    aidialog.cpp \
     chatwindow.cpp \
     clientsocket.cpp \
     fsystem.cpp \
@@ -15,6 +16,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    aidialog.h \
     chatwindow.h \
     clientsocket.h \
     fsystem.h \

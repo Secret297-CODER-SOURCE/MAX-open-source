@@ -29,8 +29,11 @@ class ChatWindow : public QMainWindow
 
 public:
     explicit ChatWindow(clientSocket *client, QWidget *parent = nullptr);
+protected:
+    void resizeEvent(QResizeEvent *e) override;
 private slots:
     void toggleMenu();
+    void openAiDialog();
     void showYourInfo();
     void showFindPartner();
     void showChangeTheme();
@@ -71,6 +74,7 @@ private:
     QVBoxLayout    *m_messagesLayout;
     QLineEdit      *m_messageInput;
     QPushButton    *m_sendBtn;
+    QPushButton    *m_aiBtn = nullptr;
 
     QString        m_myName;
     QString        m_myId;

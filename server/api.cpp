@@ -1,5 +1,6 @@
 #include "api.h"
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QAbstractSocket>
 
 api::api(Clients* clients, database* db, QObject* parent)
@@ -26,10 +27,48 @@ void api::handle(const QByteArray& data, QTcpSocket* socket)
     QJsonObject obj = doc.object();
     QString type = obj["type"].toString();
 
-    if      (type == "REG")  handleReg(obj, socket);
-    else if (type == "AUTH") handleAuth(obj, socket);
-    else if (type == "MSG")  handleMsg(obj, socket);
-    else if (type == "EXIT") handleExit(obj, socket);
+    if      (type == "REG")      handleReg(obj, socket);
+    else if (type == "AUTH")     handleAuth(obj, socket);
+    else if (type == "MSG")      handleMsg(obj, socket);
+    else if (type == "EXIT")     handleExit(obj, socket);
+    else if (type == "LIST")     handleList(obj, socket);
+    else if (type == "USERINFO") handleUserInfo(obj, socket);
+}
+
+void api::handleList(const QJsonObject& obj, QTcpSocket* socket)
+{
+    Q_UNUSED(obj);
+    QJsonArray arr;
+    for (int i = 0; i < m_clients->count(); i++) {
+        ClientInfo* c = m_clients->at(i);
+        QJsonObject item;
+        item["id"]       = c->id;
+        item["username"] = c->username;
+        arr.append(item);
+    }
+    QJsonObject resp;
+    resp["type"]    = "LIST";
+    resp["clients"] = arr;
+    sendJson(socket, resp);
+}
+
+void api::handleUserInfo(const QJsonObject& obj, QTcpSocket* socket)
+{
+    int id = obj["id"].toInt();
+    QString name = m_db->getUsernameById(id);
+
+    QJsonObject resp;
+    resp["type"] = "USERINFO";
+    resp["id"]   = id;
+    if (name.isEmpty()) {
+        resp["exists"]   = false;
+        resp["username"] = "";
+    } else {
+        resp["exists"]   = true;
+        resp["username"] = name;
+    }
+    sendJson(socket, resp);
+    emit logMessage("[USERINFO] id=" + QString::number(id) + " -> " + (name.isEmpty() ? "NOT FOUND" : name));
 }
 
 void api::handleReg(const QJsonObject& obj, QTcpSocket* socket)

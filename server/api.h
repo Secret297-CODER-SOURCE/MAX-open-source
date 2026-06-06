@@ -27,6 +27,8 @@ private:
     void handleAuth(const QJsonObject& obj, QTcpSocket* socket);
     void handleMsg(const QJsonObject& obj, QTcpSocket* socket);
     void handleExit(const QJsonObject& obj, QTcpSocket* socket);
+    void handleList(const QJsonObject& obj, QTcpSocket* socket);
+    void handleUserInfo(const QJsonObject& obj, QTcpSocket* socket);
 
     Clients* m_clients;
     database* m_db;
