@@ -176,3 +176,26 @@ QPushButton {
 QPushButton:hover {
     background-color: #383838;
 }
+QWidget#bubbleMine {
+    background-color: #2b5278;
+    border-radius: 14px;
+    border-bottom-right-radius: 3px;
+}
+QWidget#bubbleTheirs {
+    background-color: #212d3b;
+    border-radius: 14px;
+    border-bottom-left-radius: 3px;
+}
+QLabel#bubbleSender {
+    color: #6b74c9;
+    font-size: 11px;
+    font-weight: 600;
+}
+QLabel#bubbleText {
+    color: #e8e8e8;
+    font-size: 13px;
+}
+QLabel#bubbleTime {
+    color: #777777;
+    font-size: 10px;
+}

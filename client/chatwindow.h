@@ -17,6 +17,8 @@
 #include <QList>
 #include <QHostAddress>
 #include <QDebug>
+#include <QTime>
+#include <QScrollBar>
 
 static constexpr int WIN_W = 1109;
 static constexpr int WIN_H = 670;
@@ -45,6 +47,7 @@ private:
     void buildMenuPanel();
     void loadStyleSheet();
     void onConnectClicked();
+    void showUserNotFound(int id);
     QString printLocalIPAddresses();
     QWidget        *m_leftPanel;
     QPushButton    *m_menuBtn;
@@ -74,7 +77,8 @@ private:
     QString        m_myId;
     QString        m_partnerName;
     QString        m_partnerIp;
-
+    int  m_partnerId = -1;
+    void appendMessage(const QString &from, const QString &text, bool isMine);
 };
 
 #endif // CHATWINDOW_H
